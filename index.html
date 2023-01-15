@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Connecticut Bloomwatch</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+
+  <body>
+      <div class="title">
+        <a href="https://cyanos.org/bloomwatch/" target="_blank">
+          <img src="https://cyanos.org/wp-content/uploads/2018/06/bW_logo.png" 
+          alt="Bloomwatch" style="vertical-align: middle; width: 100%"></a></span>
+          <h1>Connecticut bloomWatch</h1>
+      </div>
+      <hr>
+        
+      <div class="info">
+        <p><a href="https://cyanos.org/bloomwatch/" target="_blank">bloomWatch</a> is an U.S. EPA crowdsourcing application that allows the public to report blooms of cyanobacteria.  
+        This map displays the blooms reported in Connecticut waterbodies. <u>Please note that the blooms reported are not verified.</u>
+        For information on State beach closures go to CT DEEP website.  For town beach closures contact your local health district. </p>
+      </div>
+
+      <div class="dateRange">
+        <i>Move sliders to return bloom observations for selected date range.</i>
+        <br>
+        <div id="slider-range"></div>
+        <p>
+          <label for="odate">Date Range:</label>
+          <input type="text" id="odate" readonly>
+          </p>
+      </div>
+
+      <div class="legend">
+        <div id="dot1"></div> <div class="legendTxt">Observed bloom within select date range </div>
+        <div id="dot2"></div> <div class="legendTxt">Observation outside date range or no bloom observed </div>
+      </div>
+      
+      
+    
+
+    
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="main.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+  </body>
+
+</html>
