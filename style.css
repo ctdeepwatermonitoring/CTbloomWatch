@@ -6,6 +6,15 @@ body {
   color:#ffffff;
 }
 
+a {
+  /* color:darkorange */
+  color: #009200;
+}
+
+a :hover {
+  background-color: #f6931f;
+}
+
 #map {
   position: absolute;
   width: 75%;
@@ -13,6 +22,7 @@ body {
   top: 0;
   bottom: 0;
   background-color: #ffffff;
+  overflow: hidden;
 }
 
 .title{
@@ -22,24 +32,14 @@ body {
   z-index: 1000;
   padding: 0em 1em;
   display: flex;
+  overflow:hidden;
 }
 
 .info{
   z-index: 1000;
   width: 20%;
-  padding: 0em 1em;
- 
-}
-
-a {
-  /* color:darkorange */
-  color: #009200
-}
-
-.dateRange{
-  z-index: 1000;
-  width: 20%;
   padding: 1em;
+  overflow-x:auto
 }
 
 #slider-range {
@@ -52,33 +52,77 @@ a {
   border:0; 
   color:#f6931f; 
   font-weight:bold; 
-  background-color: #333333;;
+  background-color: #333333;
 }
 
 .legend{
-  width: 25%;
+  width: 90%;
   padding: 0em 1em;
+  
 }
 
 .legendTxt {
-  padding-left: 5em;
+  padding-left: 1em;
+  font-size: 1em;
 }
 
 #dot1 {
-  height: 20px;
-  width: 20px;
+  height: 15px;
+  width: 15px;
   background-color: #009200;
   border-radius: 50%;
+  vertical-align: middle;
   display: inline-block;
 }
 
 #dot2 {
-  height: 20px;
-  width: 20px;
+  height: 15px;
+  width: 15px;
   background-color: #b6b6b6;
   border-radius: 50%;
+  vertical-align: middle;
   display: inline-block;
 }
 
 
+.bloomExtent{
+  margin-top: 5%;
+  display:flex;
+  align-items: center;
+}
+
+.bloomExtentTxt{
+  padding-left: 1em;
+}
+
+#circle {
+  margin-top: 5%;
+  border-radius: 50%;
+  border-style: solid;
+  border-color: #009200;
+  border-width: medium;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+@media all and (min-width: 768px) and (max-width: 1400px) {
+  .title{
+      font-size:80%;
+ }
+ .info{
+  font-size:80%;
+ }
+}
+
+@media all and (min-width: 0px) and (max-width: 768px) {
+  .title{
+      font-size:30%;
+  }
+  .info{
+    font-size:50%;
+   }
+   #slider-range label{
+    font-size:10%;
+   }
+}
 

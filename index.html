@@ -21,30 +21,37 @@
       <hr>
         
       <div class="info">
-        <p><a href="https://cyanos.org/bloomwatch/" target="_blank">bloomWatch</a> is an U.S. EPA crowdsourcing application that allows the public to report blooms of cyanobacteria.  
-        This map displays the blooms reported in Connecticut waterbodies. <u>Please note that the blooms reported are not verified.</u>
-        For information on State beach closures go to CT DEEP website.  For town beach closures contact your local health district. </p>
-      </div>
+          <p><a href="https://cyanos.org/bloomwatch/" target="_blank">bloomWatch</a> is an U.S. EPA crowdsourcing application that allows the public to report blooms of cyanobacteria.  
+          This map displays the blooms reported in Connecticut waterbodies. <u>Please note that the blooms reported are not verified.</u>
+          For information on State beach closures go to CT DEEP website.  For town beach closures contact your local health district. </p>
+        
 
-      <div class="dateRange">
-        <i>Move sliders to return bloom observations for selected date range.</i>
-        <br>
-        <div id="slider-range"></div>
-        <p>
-          <label for="odate">Date Range:</label>
-          <input type="text" id="odate" readonly>
-          </p>
-      </div>
+        <div class="dateRange">
+          <i>Move sliders to return bloom observations for selected date range.</i>
+          <br>
+          <div id="slider-range"></div>
+          <p>
+            <label for="odate">Date Range:</label>
+            <input type="text" id="odate" readonly>
+            </p>
+        </div>
 
-      <div class="legend">
-        <div id="dot1"></div> <div class="legendTxt">Observed bloom within select date range </div>
-        <div id="dot2"></div> <div class="legendTxt">Observation outside date range or no bloom observed </div>
+        <div class="legend">
+          <div id="dot1"></div><div class="legendTxt">Observed bloom within select date range </div><br>
+          <div id="dot2"></div><div class="legendTxt">Observation outside date range or no bloom observed </div>
+        </div>
+
+        <div class="bloomExtent">
+          <div id="circle" style="width: 40px; height: 40px">
+          <div id="circle" style="width: 30px; height: 30px; position: relative; margin: 2px 0px 0px 2px;">
+            <div id="circle" style="width: 20px; height: 20px; position: relative; margin: 2px 0px 0px 2px;">
+            </div>
+          </div>
+          </div>
+          <div class = "bloomExtentTxt" style: "margin-left: 10em;">Larger map symbol indicates a larger bloom extent was observed</div>
+        </div>
       </div>
       
-      
-    
-
-    
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" crossorigin=""></script>

@@ -52,61 +52,68 @@ console.log(burl);
 
 //https://base_service(base)/survey_1_2_3/FeatureServer/0/ #attachment_id# (200) /attachments/ #image_id# (130)
 
-
-d3.json(burl).then(function(bloomwatchData){
-    var img = {};
-    ctFeatures = [];
-
-    for(var i=0; i<bloomwatchData['features'].length; i++){
-        if(bloomwatchData['features'][i]['properties']['stateprov'] == 'CT'){
-            ctFeatures.push(bloomwatchData['features'][i])
-        }
-    }
-
-    var ctBloomwatch = {type: 'FeatureCollection', features: ctFeatures};
-    //console.log(ctBloomwatch);
-
-    ctBloomwatch['features'][0]['id'] //one way
-    ctBloomwatch['features'][0]['properties']['objectid'] //second way
-
-    var global_to_aid = {};
-    var aid_to_idx    = {};
-    var uimgs = [];
-    for(var i=0; i<ctBloomwatch['features'].length;i++){
-        var aid = ctBloomwatch['features'][i]['id'];
-        global_to_aid[ctBloomwatch['features'][i]['properties']['globalid']] = aid;
-        aid_to_idx[aid] = i;
-        var uimg = base + s123 + fsrv + aid +"/attachments/?f=pjson&token="
-        uimgs.push(d3.json(uimg));
-        ctBloomwatch['features'][i]['properties']['iids'] = []; 
-    } 
-
-    //console.log(global_to_aid);
-    //console.log(aid_to_idx);
-    Promise.all(uimgs).then(resolve_junk_response);
-
-    function resolve_junk_response(junk_data){
-        //console.log(junk_data);
-        for(var i=0; i<junk_data.length;i++){
-            for(var j=0; j<junk_data[i]['attachmentInfos'].length;j++){
-                var gid = junk_data[i]['attachmentInfos'][j]['parentGlobalId'];
-                var iid = junk_data[i]['attachmentInfos'][j]['id'];
-                var aid = global_to_aid[gid];
-                ctBloomwatch['features'][aid_to_idx[aid]]['properties']['iids'].push(iid);
+d3.json("data/ctStateBoundary.geojson").then(function(bound){
+    d3.json(burl).then(function(bloomwatchData){
+        var img = {};
+        ctFeatures = [];
+    
+        for(var i=0; i<bloomwatchData['features'].length; i++){
+            if(bloomwatchData['features'][i]['properties']['stateprov'] == 'CT'){
+                ctFeatures.push(bloomwatchData['features'][i])
             }
         }
-        console.log(ctBloomwatch);
-        console.log(d3.timeFormat("%Y-%m-%d")((ctBloomwatch['features'][92]['properties']['obsdate'])));
-        //map layer drawing must go here, this is the synchronized section, AKA the end!!!
-        //leaflet code here please.....
-        drawMap(ctBloomwatch)
-
-      
-    }
-
     
-    //},function(img_err){ console.log('img error...')} ); //img_data call
-},function(burl_err){ console.log('burl='+burl+' error...')}); //burl call
+        var ctBloomwatch = {type: 'FeatureCollection', features: ctFeatures};
+        //console.log(ctBloomwatch);
+    
+        ctBloomwatch['features'][0]['id'] //one way
+        ctBloomwatch['features'][0]['properties']['objectid'] //second way
+    
+        var global_to_aid = {};
+        var aid_to_idx    = {};
+        var uimgs = [];
+        for(var i=0; i<ctBloomwatch['features'].length;i++){
+            var aid = ctBloomwatch['features'][i]['id'];
+            global_to_aid[ctBloomwatch['features'][i]['properties']['globalid']] = aid;
+            aid_to_idx[aid] = i;
+            var uimg = base + s123 + fsrv + aid +"/attachments/?f=pjson&token="
+            uimgs.push(d3.json(uimg));
+            ctBloomwatch['features'][i]['properties']['iids'] = []; 
+        } 
+    
+        //console.log(global_to_aid);
+        //console.log(aid_to_idx);
+        Promise.all(uimgs).then(resolve_junk_response);
+    
+        function resolve_junk_response(junk_data){
+            //console.log(junk_data);
+            for(var i=0; i<junk_data.length;i++){
+                for(var j=0; j<junk_data[i]['attachmentInfos'].length;j++){
+                    var gid = junk_data[i]['attachmentInfos'][j]['parentGlobalId'];
+                    var iid = junk_data[i]['attachmentInfos'][j]['id'];
+                    var aid = global_to_aid[gid];
+                    ctBloomwatch['features'][aid_to_idx[aid]]['properties']['iids'].push(iid);
+                }
+            }
+            console.log(ctBloomwatch);
+            console.log(d3.timeFormat("%Y-%m-%d")((ctBloomwatch['features'][92]['properties']['obsdate'])));
+            //map layer drawing must go here, this is the synchronized section, AKA the end!!!
+            //leaflet code here please.....
+            drawMap(ctBloomwatch)
+
+            // load GeoJSON of CT Boundary
+            var linestyle = {"color": "#333333","weight": 2,};
+            L.geoJson(bound,{style:linestyle}).addTo(map);
+    
+          
+        }
+    
+        
+        //},function(img_err){ console.log('img error...')} ); //img_data call
+    },function(burl_err){ console.log('burl='+burl+' error...')}) //burl call
+});
+
+
 
 function drawMap(ctBloomwatch){
 
@@ -117,7 +124,6 @@ function drawMap(ctBloomwatch){
             obsDate.push(od);
         } 
     }
-
 
     var geojsonMarkerOptions = {
         radius: 8,
@@ -140,6 +146,7 @@ function drawMap(ctBloomwatch){
                     
                         // set the fill color of layer based on its normalized data value
                         layer.setStyle({
+                            radius: bloomSize(props['obsdate'], 1641013261000, 1672549261000, props['bloomExtent']),
                             fillColor: getColor(props['obsdate'], 1641013261000, 1672549261000, props['bloomExtent'])
                         });
 
@@ -185,6 +192,7 @@ function addSliderInteraction(sites){
 
         // set the fill color of layer based on data value
         layer.setStyle({
+            radius: bloomSize(props['obsdate'], vals[0], vals[1], props['bloomExtent']),
             fillColor: getColor(props['obsdate'], vals[0], vals[1], props['bloomExtent'])
         });
 
@@ -221,6 +229,28 @@ function sliderRange(obsDate){
       }); 
 }
 
+function bloomSize(date, sdate, edate, extent){
+    var s = ['Larger than a football field', 
+             'Between a football field and a tennis court', 
+             'Between a tennis court and a car',
+             'Smaller than a car',
+             'No bloom present']
+
+    if(date >= sdate && date <= edate && extent == s[0]){
+        return 16
+    }
+    if(date >= sdate && date <= edate && extent == s[1]){
+        return 14
+    }
+    if(date >= sdate && date <= edate && extent == s[2]){
+        return 12
+    }
+    if(date >= sdate && date <= edate && extent == s[3]){
+        return 10
+    } else {
+        return 8
+    }
+}
 
 
 
