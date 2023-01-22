@@ -1,37 +1,30 @@
-var lat= 41.55;
-var lng= -72.65;
-var zoom= 9;
-
-//Load a tile layer base map from USGS ESRI tile server https://apps.nationalmap.gov/services/
+//Load base map from USGS https://apps.nationalmap.gov/services/ and MapBox
 var hydro = L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/{z}/{y}/{x}',{
-    attribution: 'USGS The National Map: National Hydrography Dataset. Data refreshed July, 2022.',
+    attribution: 'USGS The National Map: National Hydrography Dataset',
     maxZoom:16}),
     topo = L.tileLayer('https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}',{
-        attribution: 'USGS The National Map: Orthoimagery and US Topo. Data refreshed December, 2022.',
+        attribution: 'USGS The National Map: Orthoimagery and US Topo',
         maxZoom:16
+    }),
+    sat = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 22,
+        id: 'mapbox.satellite',
+        accessToken: 'pk.eyJ1IjoibWFyeS1iZWNrZXIiLCJhIjoiY2p3bTg0bDlqMDFkeTQzcDkxdjQ2Zm8yMSJ9._7mX0iT7OpPFGddTDO5XzQ'
     });
 
-var baseMaps = {
-    "Hydro": hydro,
-    "Topo": topo,
-  };
+var baseMaps = {"NHD Hydro": hydro, "USGS Topo": topo, "MapBox Satellite": sat};
 
-var map = L.map('map', {
-    zoomControl: false,
-    attributionControl: false,
-    layers:[hydro]
-});
-
-map.setView([lat, lng], zoom);
+// Initial map view settings
+var map = L.map('map', {zoomControl: false, attributionControl: false, layers:[hydro]});
+var bounds = [[40.946713,-73.751221],[42.0839551, -71.7594548]];
+map.fitBounds(bounds);
 map.createPane('top');
 map.getPane('top').style.zIndex=650;
 
+// Controls on the map
 L.control.attribution({position: 'bottomleft'}).addTo(map);
-
-L.control.zoom({
-     position:'topright'
-}).addTo(map);
-
+L.control.zoom({position:'topright'}).addTo(map);
 L.control.layers(baseMaps).addTo(map);
 
 var base = "https://services5.arcgis.com/ffJESZQ7ml5P9xH7/ArcGIS/rest/services/"
@@ -117,6 +110,10 @@ d3.json("data/ctStateBoundary.geojson").then(function(bound){
 
 function drawMap(ctBloomwatch){
 
+    // map.on("click", function(e){
+    //     console.log(e.latlng);
+    // });
+
     obsDate = [];
     for(var i=0; i<ctBloomwatch['features'].length; i++){
         od = ctBloomwatch['features'][i]['properties']['obsdate']
@@ -141,28 +138,64 @@ function drawMap(ctBloomwatch){
                             return L.circleMarker(latlng, geojsonMarkerOptions);
                         },
                         onEachFeature: function(feature, layer) {
+                            
                             var props = layer.feature.properties;
-                            var iurl = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][0]
-                    
+                            var iurl  = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][0];
+                            var iurl2 = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][1];
+                            var iurl3 = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][2];
+
+                            
                         // set the fill color of layer based on its normalized data value
                         layer.setStyle({
                             radius: bloomSize(props['obsdate'], 1641013261000, 1672549261000, props['bloomExtent']),
                             fillColor: getColor(props['obsdate'], 1641013261000, 1672549261000, props['bloomExtent'])
                         });
 
-                        let tooltipInfo = `<b>${props['lakeName']}</b></br>
-                        Observed Date: ${fdate(props['obsdate'])}</br>
-                        Observed Bloom: ${props['bloomExtent']}</br>
-                        <img src="${iurl}" alt = "No Image Available" style="width:300px">`;
+                        if(props['iids'].length == 1){
+                            var popupContent = `<b>${props['lakeName']}</b></br>
+                            ${props['iids'][0]},${props['iids'][1]},${props['iids'][2]}</br>
+                            Observed Date: ${fdate(props['obsdate'])}</br>
+                            Observed Bloom: ${props['bloomExtent']}</br>
+                            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}>`;
+                        }
+                        else if(props['iids'].length == 2){
+                            var popupContent = `<b>${props['lakeName']}</b></br>
+                            ${props['iids'][0]},${props['iids'][1]},${props['iids'][2]}</br>
+                            Observed Date: ${fdate(props['obsdate'])}</br>
+                            Observed Bloom: ${props['bloomExtent']}</br>
+                            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}>
+                            <img id='popupImg' src='${iurl2}' alt = ${props['descriptPic2']}>`;
+                        }
+                        else if(props['iids'].length == 3){
+                            var popupContent = `<b>${props['lakeName']}</b></br>
+                            ${props['iids'][0]},${props['iids'][1]},${props['iids'][2]}</br>
+                            Observed Date: ${fdate(props['obsdate'])}</br>
+                            Observed Bloom: ${props['bloomExtent']}</br>
+                            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}>
+                            <img id='popupImg' src='${iurl2}' alt = ${props['descriptPic2']}>
+                            <img id='popupImg' src='${iurl3}' alt = ${props['descriptPic3']}>`;
+                        }
+                        else{
+                            var popupContent = `<b>${props['lakeName']}</b></br>
+                            ${props['iids'][0]},${props['iids'][1]},${props['iids'][2]}</br>
+                            Observed Date: ${fdate(props['obsdate'])}</br>
+                            Observed Bloom: ${props['bloomExtent']}</br>
+                            <img id='popupImg' src='images/noImage.png' alt = 'No Image Available'>`
+                        }
+
+                        
                     
                         // // bind a tooltip to layer with county-specific information
-                        layer.bindTooltip(tooltipInfo, {
-                            // sticky property so tooltip follows the mouse
-                            sticky: true
+                        layer.bindPopup(popupContent, {
+                            maxWidth: 500
+                        });
+
+                        layer.on('click', function(e){
+                            map.setView(e.target.getLatLng(), 10)
                         });
                     
-                        }
-                    }).addTo(map);
+                    }
+    }).addTo(map);
 
                     sliderRange(obsDate);
                     addSliderInteraction(sites)
@@ -196,16 +229,20 @@ function addSliderInteraction(sites){
             fillColor: getColor(props['obsdate'], vals[0], vals[1], props['bloomExtent'])
         });
 
-        let tooltipInfo = `<b>${props['lakeName']}</b></br>
-        Observed Date: ${fdate(props['obsdate'])}</br>
-        Observed Bloom: ${props['bloomExtent']}</br>
-        <img src="${iurl}" alt = "No Image Available" style="width:300px">`;
-    
-        // bind a tooltip to layer 
-        layer.bindTooltip(tooltipInfo, {
-            // sticky property so tooltip follows the mouse
-            sticky: true
-        });
+        let popupContent = `<b>${props['lakeName']}</b></br>
+                        Observed Date: ${fdate(props['obsdate'])}</br>
+                        Observed Bloom: ${props['bloomExtent']}</br>
+                        <img src="${iurl}" alt = "No Image Available" style="width:200px">`;
+                    
+                        // // bind a tooltip to layer with county-specific information
+                        layer.bindPopup(popupContent, {
+                            maxWidth: 200
+                        });
+
+                        layer.on('click', function(e){
+                            map.setView(e.target.getLatLng(), 9)
+                        });
+                    
     }); 
         
       } );
@@ -251,7 +288,6 @@ function bloomSize(date, sdate, edate, extent){
         return 8
     }
 }
-
 
 
 

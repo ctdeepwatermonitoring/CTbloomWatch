@@ -105,6 +105,14 @@ a :hover {
   display: inline-block;
 }
 
+#popupImg{
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+  padding: 5px;
+  border: 1px #008fdd;    
+}
+
 @media all and (min-width: 768px) and (max-width: 1400px) {
   .title{
       font-size:80%;
