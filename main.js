@@ -44,7 +44,7 @@ console.log(burl);
 // example to get image.  200 is the id contained in geojson point data.  130 is id from image json
 // "https://services5.arcgis.com/ffJESZQ7ml5P9xH7/arcgis/rest/services/survey123_2bd9b97d23124dbfae7df325f106039b_stakeholder/FeatureServer/0/200/attachments/130"
 
-//https://base_service(base)/survey_1_2_3/FeatureServer/0/ #attachment_id# (200) /attachments/ #image_id# (130)
+// https://base_service(base)/survey_1_2_3/FeatureServer/0/ #attachment_id# (200) /attachments/ #image_id# (130)
 
 d3.json("data/ctStateBoundary.geojson").then(function(bound){
     d3.csv("data/cell_cnt.csv").then(function(cellCnt){
@@ -59,7 +59,7 @@ d3.json("data/ctStateBoundary.geojson").then(function(bound){
             }
         
             var ctBloomwatch = {type: 'FeatureCollection', features: ctFeatures};
-            //console.log(ctBloomwatch);
+            console.log(ctBloomwatch);
         
             ctBloomwatch['features'][0]['id'] //one way
             ctBloomwatch['features'][0]['properties']['objectid'] //second way
@@ -150,174 +150,107 @@ function drawMap(ctBloomwatch){
         fillOpacity: 0.8
     };
 
+    function sites_marker(feature, latlng){
+        return L.circleMarker(latlng, geojsonMarkerOptions);
+    }
+
+    function sites_feature(feature, layer){
+        var props = layer.feature.properties;
+        var iurl  = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][0];
+        var iurl2 = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][1];
+        var iurl3 = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][2];
+
+        
+        // set the fill color of layer based on its normalized data value
+        layer.setStyle({
+            radius: bloomSize(props['bloomExtent']),
+            fillColor: getColor(props['bloomExtent'])
+        });
+
+        if(props['iids'].length == 1){
+            var popupContent = `<b>${props['lakeName']}</b></br>
+            Observed Date: ${fdate(props['obsdate'])}</br>
+            Observed Bloom: ${props['bloomExtent']}</br>
+            Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
+            <a href='${iurl}' target="_blank">
+            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a></br>
+            <i>Click on an image to enlarge</i>`;
+        }
+        else if(props['iids'].length == 2){
+            var popupContent = `<b>${props['lakeName']}</b></br>
+            Observed Date: ${fdate(props['obsdate'])}</br>
+            Observed Bloom: ${props['bloomExtent']}</br>
+            Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
+            <a href='${iurl}' target="_blank">
+            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a>
+            <a href='${iurl2}' target="_blank">
+            <img id='popupImg' src='${iurl2}' alt = ${props['descriptPic2']}></a></br>
+            <i>Click on an image to enlarge</i>`;
+        }
+        else if(props['iids'].length == 3){
+            var popupContent = `<b>${props['lakeName']}</b></br>
+            Observed Date: ${fdate(props['obsdate'])}</br>
+            Observed Bloom: ${props['bloomExtent']}</br>
+            Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
+            <a href='${iurl}' target="_blank">
+            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a>
+            <a href='${iurl2}' target="_blank">
+            <img id='popupImg' src='${iurl2}' alt = ${props['descriptPic2']}></a>
+            <a href='${iurl3}' target="_blank">
+            <img id='popupImg' src='${iurl3}' alt = ${props['descriptPic3']}></a></br>
+            <i>Click on an image to enlarge</i>`;
+        }
+        else{
+            var popupContent = `<b>${props['lakeName']}</b></br>
+            Observed Date: ${fdate(props['obsdate'])}</br>
+            Observed Bloom: ${props['bloomExtent']}</br>
+            Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
+            <img id='popupImg' src='images/noImage.png' alt = 'No Image Available'></br>
+            <i>Click on an image to enlarge</i>`
+        }
+
+        //bind a tooltip to layer with specific information
+        layer.bindPopup(popupContent, {
+            maxWidth: 400,
+            className: 'customPopup'
+        });
+
+        // layer.on('click', function(e){
+        //     map.setView(e.target.getLatLng(), 10)
+        // });
+    }
+
     var fdate = d3.timeFormat("%Y-%m-%d")
 
+    const markers = L.markerClusterGroup({
+        maxClusterRadius: 40,
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true
+    });
+
     const sites = L.geoJSON(ctBloomwatch, {
-                        pointToLayer: function (feature, latlng) {
-                            return L.circleMarker(latlng, geojsonMarkerOptions);
-                        },
-                        onEachFeature: function(feature, layer) {
-                            
-                            var props = layer.feature.properties;
-                            var iurl  = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][0];
-                            var iurl2 = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][1];
-                            var iurl3 = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][2];
+                        // filter: function(feature, layer){
+                        //     return feature.properties.lakeName == "Lake Lillinonah"
+                        // },
+                        pointToLayer: sites_marker,
+                        onEachFeature: sites_feature
+    })
 
-                            
-                        // set the fill color of layer based on its normalized data value
-                        layer.setStyle({
-                            radius: bloomSize(props['obsdate'], 1641013261000, 1672549261000, props['bloomExtent']),
-                            fillColor: getColor(props['obsdate'], 1641013261000, 1672549261000, props['bloomExtent'])
-                        });
-
-                        if(props['iids'].length == 1){
-                            var popupContent = `<b>${props['lakeName']}</b></br>
-                            Observed Date: ${fdate(props['obsdate'])}</br>
-                            Observed Bloom: ${props['bloomExtent']}</br>
-                            Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
-                            <a href='${iurl}' target="_blank">
-                            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a></br>
-                            <i>Click on an image to enlarge</i>`;
-                        }
-                        else if(props['iids'].length == 2){
-                            var popupContent = `<b>${props['lakeName']}</b></br>
-                            Observed Date: ${fdate(props['obsdate'])}</br>
-                            Observed Bloom: ${props['bloomExtent']}</br>
-                            Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
-                            <a href='${iurl}' target="_blank">
-                            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a>
-                            <a href='${iurl2}' target="_blank">
-                            <img id='popupImg' src='${iurl2}' alt = ${props['descriptPic2']}></a></br>
-                            <i>Click on an image to enlarge</i>`;
-                        }
-                        else if(props['iids'].length == 3){
-                            var popupContent = `<b>${props['lakeName']}</b></br>
-                            Observed Date: ${fdate(props['obsdate'])}</br>
-                            Observed Bloom: ${props['bloomExtent']}</br>
-                            Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
-                            <a href='${iurl}' target="_blank">
-                            <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a>
-                            <a href='${iurl2}' target="_blank">
-                            <img id='popupImg' src='${iurl2}' alt = ${props['descriptPic2']}></a>
-                            <a href='${iurl3}' target="_blank">
-                            <img id='popupImg' src='${iurl3}' alt = ${props['descriptPic3']}></a></br>
-                            <i>Click on an image to enlarge</i>`;
-                        }
-                        else{
-                            var popupContent = `<b>${props['lakeName']}</b></br>
-                            Observed Date: ${fdate(props['obsdate'])}</br>
-                            Observed Bloom: ${props['bloomExtent']}</br>
-                            Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
-                            <img id='popupImg' src='images/noImage.png' alt = 'No Image Available'></br>
-                            <i>Click on an image to enlarge</i>`
-                        }
-
-                        
-                    
-                        // // bind a tooltip to layer with county-specific information
-                        layer.bindPopup(popupContent, {
-                            maxWidth: 400,
-                            className: 'customPopup'
-                        });
-
-                        layer.on('click', function(e){
-                            map.setView(e.target.getLatLng(), 10)
-                        });
-                    
-                    }
-    }).addTo(map);
-
-                    sliderRange(obsDate);
-                    addSliderInteraction(sites)
+    markers.addLayer(sites);
+    map.addLayer(markers);
+    sliderRange(obsDate);
+    // addSliderInteraction(sites);
+    addSliderInteraction(markers, ctBloomwatch, sites_marker, sites_feature);
 
                     
 }
 
-function getColor(date, sdate, edate, bloom){
-    if(date >= sdate && date <= edate && bloom != "No bloom present"){
+function getColor(bloom){
+    if(bloom != "No bloom present"){
         return "#009200"
     } else {
         return "#333333"
     }
-};
-
-function addSliderInteraction(sites){
-
-    $("#slider-range" ).on( "slide", function( event, ui ) {
-        var vals = ui.values;
-
-        // loop through each county layer to update the color and tooltip info
-        sites.eachLayer(function (layer) {
-
-            var fdate = d3.timeFormat("%Y-%m-%d");
-            var props = layer.feature.properties;
-            var iurl  = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][0];
-            var iurl2 = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][1];
-            var iurl3 = base + s123 + fsrv + props['objectid'] + "/attachments/" + props['iids'][2];
-
-
-            // set the fill color of layer based on data value
-            layer.setStyle({
-                radius: bloomSize(props['obsdate'], vals[0], vals[1], props['bloomExtent']),
-                fillColor: getColor(props['obsdate'], vals[0], vals[1], props['bloomExtent'])
-            });
-
-            if(props['iids'].length == 1){
-                var popupContent = `<b>${props['lakeName']}</b></br>
-                Observed Date: ${fdate(props['obsdate'])}</br>
-                Observed Bloom: ${props['bloomExtent']}</br>
-                Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
-                <a href='${iurl}' target="_blank">
-                <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a></br>
-                <i>Click on an image to enlarge</i>`;
-            }
-            else if(props['iids'].length == 2){
-                var popupContent = `<b>${props['lakeName']}</b></br>
-                Observed Date: ${fdate(props['obsdate'])}</br>
-                Observed Bloom: ${props['bloomExtent']}</br>
-                Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
-                <a href='${iurl}' target="_blank">
-                <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a>
-                <a href='${iurl2}' target="_blank">
-                <img id='popupImg' src='${iurl2}' alt = ${props['descriptPic2']}></a></br>
-                <i>Click on an image to enlarge</i>`;
-            }
-            else if(props['iids'].length == 3){
-                var popupContent = `<b>${props['lakeName']}</b></br>
-                Observed Date: ${fdate(props['obsdate'])}</br>
-                Observed Bloom: ${props['bloomExtent']}</br>
-                Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
-                <a href='${iurl}' target="_blank">
-                <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a>
-                <a href='${iurl2}' target="_blank">
-                <img id='popupImg' src='${iurl2}' alt = ${props['descriptPic2']}></a>
-                <a href='${iurl3}' target="_blank">
-                <img id='popupImg' src='${iurl3}' alt = ${props['descriptPic3']}></a></br>
-                <i>Click on an image to enlarge</i>`;
-            }
-            else{
-                var popupContent = `<b>${props['lakeName']}</b></br>
-                Observed Date: ${fdate(props['obsdate'])}</br>
-                Observed Bloom: ${props['bloomExtent']}</br>
-                Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
-                <img id='popupImg' src='images/noImage.png' alt = 'No Image Available'></br>
-                <i>Click on an image to enlarge</i>`
-            }
-                        
-            //bind a tooltip to layer 
-            layer.bindPopup(popupContent, {
-                maxWidth: 400,
-                className: 'customPopup'
-            });
-
-            layer.on('click', function(e){
-                map.setView(e.target.getLatLng(), 9)
-            });
-                        
-        }); 
-        
-      });
-    
 };
 
 function sliderRange(obsDate){
@@ -337,28 +270,48 @@ function sliderRange(obsDate){
       }); 
 }
 
-function bloomSize(date, sdate, edate, extent){
+function bloomSize(extent){
     var s = ['Larger than a football field', 
              'Between a football field and a tennis court', 
              'Between a tennis court and a car',
              'Smaller than a car',
              'No bloom present']
 
-    if(date >= sdate && date <= edate && extent == s[0]){
+    if(extent == s[0]){
         return 16
     }
-    if(date >= sdate && date <= edate && extent == s[1]){
+    if(extent == s[1]){
         return 14
     }
-    if(date >= sdate && date <= edate && extent == s[2]){
+    if(extent == s[2]){
         return 12
     }
-    if(date >= sdate && date <= edate && extent == s[3]){
+    if(extent == s[3]){
         return 10
     } else {
         return 8
     }
 }
+
+function addSliderInteraction(markers, ctBloomwatch, sites_marker, sites_feature){
+    $("#slider-range" ).on( "slide", function( event, ui ) {
+        var vals = ui.values;
+        console.log(vals[1]);
+        markers.clearLayers();
+        
+        const sites = L.geoJSON(ctBloomwatch, {
+            filter: function(feature, layer){
+                return (feature.properties.obsdate <= vals[1] &&
+                    feature.properties.obsdate >= vals[0]);
+            },
+            pointToLayer: sites_marker,
+            onEachFeature: sites_feature
+        })
+
+        markers.addLayer(sites);
+    })
+
+};
 
 
 

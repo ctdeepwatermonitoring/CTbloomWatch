@@ -1,4 +1,5 @@
 library(jsonlite)
+library(lubridate)
 
 base    <- "https://services5.arcgis.com/ffJESZQ7ml5P9xH7/ArcGIS/rest/services/"
 survey  <- "survey123_2bd9b97d23124dbfae7df325f106039b_stakeholder/"  
@@ -11,4 +12,7 @@ att_data  <- data_list$features$attributes
 geo_data  <- data_list$features$geometry
 bdata     <- cbind(att_data,geo_data)
 
-write.csv(bdata, "C:/Users/deepuser/Desktop/bloomWatch_data.csv")
+bdata$Date <- as_datetime(bdata$obsdate/1000)
+bdataCT <- bdata[bdata$stateprov == "CT" | bdata$stateprov == "ct",]
+
+write.csv(bdataCT, "C:/Users/deepuser/Desktop/bloomWatch_data_connecticut.csv")
