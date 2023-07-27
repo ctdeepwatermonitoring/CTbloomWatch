@@ -229,9 +229,10 @@ function drawMap(ctBloomwatch){
     });
 
     const sites = L.geoJSON(ctBloomwatch, {
-                        // filter: function(feature, layer){
-                        //     return feature.properties.lakeName == "Lake Lillinonah"
-                        // },
+                        filter: function(feature, layer){
+                            return (feature.properties.obsdate <= Date.now() &&
+                                feature.properties.obsdate >= 1672549261000);
+                        },
                         pointToLayer: sites_marker,
                         onEachFeature: sites_feature
     })
@@ -259,7 +260,7 @@ function sliderRange(obsDate){
           range: true,
           min: d3.min(obsDate),
           max: d3.max(obsDate),
-          values: [1641013261000, 1672549261000],
+          values: [1672549261000, Date.now()], //**Note to make this a global variable.  See filter in initial map instance */
           slide: function( event, ui ) {
             $("#odate" ).val(d3.timeFormat('%Y-%m-%d')(ui.values[ 0 ]) + " - " + 
             d3.timeFormat('%Y-%m-%d')(ui.values[ 1 ]));
