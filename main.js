@@ -27,11 +27,11 @@ L.control.attribution({position: 'bottomleft'}).addTo(map);
 L.control.zoom({position:'topright'}).addTo(map);
 L.control.layers(baseMaps).addTo(map);
 
-// Web service query build
+// Web service query build  ****NOTE - ESRI WILL ONLY RETURN 1000 records at a time ****
 var base = "https://services5.arcgis.com/ffJESZQ7ml5P9xH7/ArcGIS/rest/services/"
 var s123 = "survey123_2bd9b97d23124dbfae7df325f106039b_stakeholder/"
 var fsrv = "FeatureServer/0/"
-var qury = "query?where=1%3D1&outFields=*&returnGeometry=true&f=geojson"
+var qury = "query?where=1%3D1&outFields=*&resultOffset=500&returnGeometry=true&f=geojson"
 var burl = base + s123 + fsrv + qury
 console.log(burl);
 
@@ -141,6 +141,7 @@ function drawMap(ctBloomwatch){
         } 
     }
 
+    
     var geojsonMarkerOptions = {
         radius: 8,
         fillColor: "#ffffff",
