@@ -29,10 +29,10 @@ L.control.layers(baseMaps).addTo(map);
 
 // Web service query build  **** NOTE - ESRI WILL ONLY RETURN 1000 records at a time ****
 // ****NOTE - For future, need to build in loop to get all records ****
-var base = "https://services5.arcgis.com/ffJESZQ7ml5P9xH7/ArcGIS/rest/services/"
-var s123 = "survey123_2bd9b97d23124dbfae7df325f106039b_stakeholder/"
+var base = "https://services.arcgis.com/cJ9YHowT8TU7DUyn/ArcGIS/rest/services/"
+var s123 = "bloomWatch_Public_view/"
 var fsrv = "FeatureServer/0/"
-var qury = "query?where=1%3D1&outFields=*&resultOffset=500&returnGeometry=true&f=geojson"
+var qury = "query?where=state='Connecticut'&outFields=*&returnGeometry=true&f=geojson"
 var burl = base + s123 + fsrv + qury
 console.log(burl);
 
@@ -55,7 +55,7 @@ d3.json("data/ctStateBoundary.geojson").then(function(bound){
             ctFeatures = [];
         
             for(var i=0; i<bloomwatchData['features'].length; i++){
-                if(bloomwatchData['features'][i]['properties']['stateprov'] == 'CT'){
+                if(bloomwatchData['features'][i]['properties']['state'] == 'Connecticut'){
                     ctFeatures.push(bloomwatchData['features'][i])
                 }
             }
@@ -129,9 +129,9 @@ d3.json("data/ctStateBoundary.geojson").then(function(bound){
 
 
 
-
-
 function drawMap(ctBloomwatch){
+
+
 
     // map.on("click", function(e){
     //     console.log(e.latlng);
@@ -139,7 +139,7 @@ function drawMap(ctBloomwatch){
 
     obsDate = [];
     for(var i=0; i<ctBloomwatch['features'].length; i++){
-        od = ctBloomwatch['features'][i]['properties']['obsdate']
+        od = ctBloomwatch['features'][i]['properties']['date']
         if(od !=null && od !='' && od > 1577854861000){
             obsDate.push(od);
         } 
@@ -168,23 +168,23 @@ function drawMap(ctBloomwatch){
         
         // set the fill color of layer based on its normalized data value
         layer.setStyle({
-            radius: bloomSize(props['bloomExtent']),
-            fillColor: getColor(props['bloomExtent'])
+            radius: bloomsize(props['bloomsize']),
+            fillColor: getColor(props['bloomsize'])
         });
 
         if(props['iids'].length == 1){
-            var popupContent = `<b>${props['lakeName']}</b></br>
-            Observed Date: ${fdate(props['obsdate'])}</br>
-            Observed Bloom: ${props['bloomExtent']}</br>
+            var popupContent = `<b>${props['wtrbdyName']}</b></br>
+            Observed Date: ${fdate(props['date'])}</br>
+            Observed Bloom: ${props['bloomsize']}</br>
             Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
             <a href='${iurl}' target="_blank">
             <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a></br>
             <i>Click on an image to enlarge</i>`;
         }
         else if(props['iids'].length == 2){
-            var popupContent = `<b>${props['lakeName']}</b></br>
-            Observed Date: ${fdate(props['obsdate'])}</br>
-            Observed Bloom: ${props['bloomExtent']}</br>
+            var popupContent = `<b>${props['wtrbdyName']}</b></br>
+            Observed Date: ${fdate(props['date'])}</br>
+            Observed Bloom: ${props['bloomsize']}</br>
             Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
             <a href='${iurl}' target="_blank">
             <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a>
@@ -193,9 +193,9 @@ function drawMap(ctBloomwatch){
             <i>Click on an image to enlarge</i>`;
         }
         else if(props['iids'].length == 3){
-            var popupContent = `<b>${props['lakeName']}</b></br>
-            Observed Date: ${fdate(props['obsdate'])}</br>
-            Observed Bloom: ${props['bloomExtent']}</br>
+            var popupContent = `<b>${props['wtrbdyName']}</b></br>
+            Observed Date: ${fdate(props['date'])}</br>
+            Observed Bloom: ${props['bloomsize']}</br>
             Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
             <a href='${iurl}' target="_blank">
             <img id='popupImg' src='${iurl}' alt = ${props['descriptPic1']}></a>
@@ -206,9 +206,9 @@ function drawMap(ctBloomwatch){
             <i>Click on an image to enlarge</i>`;
         }
         else{
-            var popupContent = `<b>${props['lakeName']}</b></br>
-            Observed Date: ${fdate(props['obsdate'])}</br>
-            Observed Bloom: ${props['bloomExtent']}</br>
+            var popupContent = `<b>${props['wtrbdyName']}</b></br>
+            Observed Date: ${fdate(props['date'])}</br>
+            Observed Bloom: ${props['bloomsize']}</br>
             Cyanobacteria Cell Count (cells/mL): ${props['cellCnt']}</br>
             <img id='popupImg' src='images/noImage.png' alt = 'No Image Available'></br>
             <i>Click on an image to enlarge</i>`
@@ -235,8 +235,8 @@ function drawMap(ctBloomwatch){
 
     const sites = L.geoJSON(ctBloomwatch, {
                         filter: function(feature, layer){
-                            return (feature.properties.obsdate <= Date.now() &&
-                                feature.properties.obsdate >= 1672549261000);
+                            return (feature.properties.date <= Date.now() &&
+                                feature.properties.date >= 1672549261000);
                         },
                         pointToLayer: sites_marker,
                         onEachFeature: sites_feature
@@ -276,11 +276,11 @@ function sliderRange(obsDate){
       }); 
 }
 
-function bloomSize(extent){
-    var s = ['Larger than a football field', 
-             'Between a football field and a tennis court', 
-             'Between a tennis court and a car',
-             'Smaller than a car',
+function bloomsize(extent){
+    var s = ['Greater than a football field', 
+             'Between a football field and tennis court', 
+             'Between a tennis court and car',
+             'Less than a car',
              'No bloom present']
 
     if(extent == s[0]){
@@ -307,8 +307,8 @@ function addSliderInteraction(markers, ctBloomwatch, sites_marker, sites_feature
         
         const sites = L.geoJSON(ctBloomwatch, {
             filter: function(feature, layer){
-                return (feature.properties.obsdate <= vals[1] &&
-                    feature.properties.obsdate >= vals[0]);
+                return (feature.properties.date <= vals[1] &&
+                    feature.properties.date >= vals[0]);
             },
             pointToLayer: sites_marker,
             onEachFeature: sites_feature
