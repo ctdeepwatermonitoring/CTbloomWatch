@@ -3,7 +3,7 @@ library(lubridate)
 
 ## Old bloomWatch
 # base    <- "https://services5.arcgis.com/ffJESZQ7ml5P9xH7/ArcGIS/rest/services/"
-# survey  <- "bloomWatch_Public_view/"  
+# survey  <- "survey123_2bd9b97d23124dbfae7df325f106039b_stakeholder/"
 # feature <- "FeatureServer/0/"
 # cntqry  <- "query?where=1%3D1&outFields=*&returnGeometry=true&returnCountOnly=true&f=pjson&token="
 # rcnturl <- paste0(base,survey,feature,cntqry)
@@ -12,9 +12,10 @@ library(lubridate)
 # eurl    <- paste0(base,survey,feature,query)
 
 base    <- "https://services.arcgis.com/cJ9YHowT8TU7DUyn/ArcGIS/rest/services/"
-survey  <- "bloomWatch_Public_view/"  
+survey  <- "bloomWatch_Public_view/"
 feature <- "FeatureServer/0/"
 #where=1%3D1&outFields=* to get all data
+# query   <- paste0("query?where=1%3D1&outFields=*&returnGeometry=true&f=json")
 query   <- paste0("query?where=state='Connecticut'&outFields=*&returnGeometry=true&f=json")
 eurl    <- paste0(base,survey,feature,query)
 
