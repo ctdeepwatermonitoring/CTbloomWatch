@@ -252,7 +252,7 @@ function drawMap(ctBloomwatch){
 }
 
 function getColor(bloom){
-    if(bloom != "No bloom present"){
+    if(bloom != "No bloom"){
         return "#009200"
     } else {
         return "#333333"
@@ -281,7 +281,7 @@ function bloomsize(extent){
              'Between a football field and tennis court', 
              'Between a tennis court and car',
              'Less than a car',
-             'No bloom present']
+             'No bloom']
 
     if(extent == s[0]){
         return 16
