@@ -265,7 +265,7 @@ function sliderRange(obsDate){
           range: true,
           min: d3.min(obsDate),
           max: d3.max(obsDate),
-          values: [1672549261000, Date.now()], //**Note to make this a global variable.  See filter in initial map instance */
+          values: [1767268861000, Date.now()], //**Note to make this a global variable.  See filter in initial map instance */
           slide: function( event, ui ) {
             $("#odate" ).val(d3.timeFormat('%Y-%m-%d')(ui.values[ 0 ]) + " - " + 
             d3.timeFormat('%Y-%m-%d')(ui.values[ 1 ]));
