@@ -236,7 +236,7 @@ function drawMap(ctBloomwatch){
     const sites = L.geoJSON(ctBloomwatch, {
                         filter: function(feature, layer){
                             return (feature.properties.date <= Date.now() &&
-                                feature.properties.date >= 1672549261000);
+                                feature.properties.date >= 1767268861000);
                         },
                         pointToLayer: sites_marker,
                         onEachFeature: sites_feature
